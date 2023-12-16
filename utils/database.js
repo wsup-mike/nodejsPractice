@@ -1,9 +1,8 @@
-const Sequelize = require("sequelize"); // imprrt it
+const mongodb = require('mongodb');
+const MongoClient = mongodb.MongoClient;
 
-// Create new Sequelize instance with the 'Sequelize' constructor function. We pass in some options:   database name, username of database, password, ana options object.
-const sequelize = new Sequelize("node-server-project", "root", "password", {
-  dialect: "mysql",
-  host: "localhost",
-});
-
-module.exports = sequelize;
+MongoClient.connect('mongodb+srv://coolsuedeadidas:password@cluster0.s9dqd5j.mongodb.net/?retryWrites=true&w=majority')
+  .then(result => {
+    console.log('Connected to MongoDB!')
+  })
+  .catch(err => console.log(err));
