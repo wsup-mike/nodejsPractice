@@ -46,6 +46,7 @@ class Product {
   }
 
   // new comment here
+  // another comment here bro!
 
   static findByPk(prodId) {
     // first to get access to database
