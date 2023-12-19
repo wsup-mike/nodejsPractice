@@ -1,12 +1,12 @@
 const Product = require("../models/product");
-const Cart = require("../models/cart");
+// const Cart = require("../models/cart");
 
 exports.getIndexPage = (req, res, next) => {
-  Product.findAll()
+  Product.fetchAll()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
-        pageTitle: "Lets Shop!",
+        pageTitle: "Lets Shop!", 
         path: "/",
       });
     })
@@ -16,7 +16,7 @@ exports.getIndexPage = (req, res, next) => {
 };
 
 exports.getProductsPage = (req, res, next) => {
-  Product.findAll()
+  Product.fetchAll()
     .then((products) => {
       res.render("shop/product-list", {
         pageTitle: "Home Page - Lets Shop!",
@@ -30,7 +30,10 @@ exports.getProductsPage = (req, res, next) => {
 };
 
 exports.getProduct = (req, res, next) => {
+  // first we extract product id from the URL
   const prodId = req.params.productId;
+
+  // Then using Product model to 'find' that product
   Product.findByPk(prodId)
     .then((product) => {
       res.render("shop/product-detail", {

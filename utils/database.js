@@ -3,7 +3,7 @@ const MongoClient = mongodb.MongoClient
 
 let _db; // to be used only internally in this file
 
-const mongoconnect = (callback) => {
+const mongoConnect = (callback) => {
   MongoClient.connect('mongodb+srv://coolsuedeadidas:1password1@cluster0.s9dqd5j.mongodb.net/shop?retryWrites=true&w=majority')
   .then(client => {
     console.log('Connected to MongoDB!')

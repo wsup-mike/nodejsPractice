@@ -3,11 +3,10 @@ const path = require("path");
 const express = require("express");
 const app = express();
 const errorController = require("./controllers/404");
-const mongoConnect = require('./utils/database');
+const mongoConnect = require('./utils/database').mongoconnect;
 
-// const adminRoutes = require("./routes/admin");
-// const shopRoutes = require("./routes/shop");
-// const mainDirectoryPath = require("./utils/path");
+const adminRoutes = require("./routes/admin");
+const shopRoutes = require("./routes/shop");
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -27,10 +26,11 @@ app.use((req, res, next) => {
   //   .catch((err) => {
   //     console.log(err);
   //   });
+  next();
 });
 
-// app.use("/admin", adminRoutes);
-// app.use(shopRoutes);
+app.use("/admin", adminRoutes);
+app.use(shopRoutes);
 
 app.use(errorController.get404Page);
 
