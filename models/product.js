@@ -2,28 +2,38 @@ const mongodb = require("mongodb");
 const getDb = require("../utils/database").getDb; // Need the getDb method to connect to database
 
 class Product {
-  constructor(title, price, description, imageUrl) {
+  constructor(title, price, description, imageUrl, id) {
     this.title = title;
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
+    this._id = id;
   }
 
   // An 'instance method' to save this new instance in our MongoDB database
   save() {
-    // to connect to MongoDB and get the 'client' object
-    const db = getDb();
+    const db = getDb(); // to connect to MongoDB and get the 'client' object
+    
+    let dbOperation; // new variable to capture results of a given database operation
 
-    // to save the product in the MongoDB database using the 'client' object
-    return db
+    if (this._id) { // Product exists! Proceed with updating product!
+      dbOperation = db
+        .collection('products')
+        .updateOne({ _id: new mongodb.ObjectId(this._id)}, { $set: this });
+    } else {
+      // Product does NOT exist! Let's insert into database as new product!
+      dbOperation = db
       .collection("products")
       .insertOne(this)
+    }
+
+    return dbOperation
       .then((result) => {
         console.log(result);
       })
       .catch((err) => {
         console.log(err);
-      });
+      });    
   }
 
   // new Class method to fetch all existing products
@@ -46,10 +56,6 @@ class Product {
   }
 
   // new comment here
-  // another comment here bro!
-  // but yet here's another test commit!
-  // was working on this last nite
-  // But now I worked on this this mornign. Take a look
 
   static findByPk(prodId) {
     // first to get access to database
