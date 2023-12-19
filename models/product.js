@@ -49,6 +49,7 @@ class Product {
   // another comment here bro!
   // but yet here's another test commit!
   // was working on this last nite
+  // But now I worked on this this mornign. Take a look
 
   static findByPk(prodId) {
     // first to get access to database
