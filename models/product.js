@@ -13,18 +13,17 @@ class Product {
   // An 'instance method' to save this new instance in our MongoDB database
   save() {
     const db = getDb(); // to connect to MongoDB and get the 'client' object
-    
+
     let dbOperation; // new variable to capture results of a given database operation
 
-    if (this._id) { // Product exists! Proceed with updating product!
+    if (this._id) {
+      // Product exists! Proceed with updating product!
       dbOperation = db
-        .collection('products')
-        .updateOne({ _id: new mongodb.ObjectId(this._id)}, { $set: this });
+        .collection("products")
+        .updateOne({ _id: new mongodb.ObjectId(this._id) }, { $set: this });
     } else {
       // Product does NOT exist! Let's insert into database as new product!
-      dbOperation = db
-      .collection("products")
-      .insertOne(this)
+      dbOperation = db.collection("products").insertOne(this);
     }
 
     return dbOperation
@@ -33,7 +32,7 @@ class Product {
       })
       .catch((err) => {
         console.log(err);
-      });    
+      });
   }
 
   // new Class method to fetch all existing products
@@ -55,8 +54,7 @@ class Product {
       });
   }
 
-  // new comment here
-
+  // new static method
   static findByPk(prodId) {
     // first to get access to database
     const db = getDb();
@@ -69,6 +67,22 @@ class Product {
       .then((product) => {
         console.log(product);
         return product;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  static deleteById(prodId) {
+    // get access to database
+    const db = getDb();
+
+    // Query to find the document by product id  to DELETE it
+    return db
+      .collection("products")
+      .deleteOne({ _id: new mongodb.ObjectId(prodId) })
+      .then((result) => {
+        console.log("The product has been successfully deleted.");
       })
       .catch((err) => {
         console.log(err);

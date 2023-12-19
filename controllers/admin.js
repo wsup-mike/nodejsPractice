@@ -1,4 +1,4 @@
-const mongodb = require('mongodb');
+const mongodb = require("mongodb");
 const Product = require("../models/product");
 
 const ObjectId = mongodb.ObjectId;
@@ -39,7 +39,7 @@ exports.getEditProductPage = (req, res, next) => {
   const prodId = req.params.productId;
 
   // Lets find the product to be edited
-    Product.findByPk(prodId)
+  Product.findByPk(prodId)
     .then((product) => {
       if (!product) {
         return res.redirect("/");
@@ -63,15 +63,14 @@ exports.postEditProductPage = (req, res, next) => {
   const updatedDescription = req.body.description;
   const updatedPrice = req.body.price;
 
-  
   const product = new Product(
-    updatedTitle, 
-    updatedPrice, 
-    updatedDescription, 
-    updatedImageUrl, 
+    updatedTitle,
+    updatedPrice,
+    updatedDescription,
+    updatedImageUrl,
     new ObjectId(prodId)
   );
-      
+
   product // this line officially saves everything to database
     .save()
     .then((result) => {
@@ -84,8 +83,7 @@ exports.postEditProductPage = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product
-    .fetchAll()
+  Product.fetchAll()
     .then((products) => {
       res.render("admin/products", {
         prods: products,
@@ -98,18 +96,15 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
-// exports.postDeleteProduct = (req, res, next) => {
-//   const prodId = req.body.productId;
+exports.postDeleteProduct = (req, res, next) => {
+  const prodId = req.body.productId;
 
-//   Product.findByPk(prodId)
-//     .then((product) => {
-//       return product.destroy();
-//     })
-//     .then((result) => {
-//       console.log("Product Destroyed");
-//       res.redirect("/admin/products");
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//     });
-// };
+  Product.deleteById(prodId)
+    .then(() => {
+      console.log("Product Destroyed");
+      res.redirect("/admin/products");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
