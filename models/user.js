@@ -97,6 +97,15 @@ class User {
     //to first work with a NEW collection in our database!
     // to insert 1 new order that represents our current cart!
     const db = getDb();
+
+    const order = {
+      items: this.cart.items,
+      user: {
+        _id: new ObjectId(this._id),
+        name: this.name,
+      },
+    };
+
     return db
       .collection("orders") // to insert existing 'cart' in orders collection!
       .insertOne(this.cart)
