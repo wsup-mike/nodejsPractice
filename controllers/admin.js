@@ -1,7 +1,7 @@
-const mongodb = require("mongodb");
+// const mongodb = require("mongodb");
 const Product = require("../models/product");
 
-const ObjectId = mongodb.ObjectId;
+// const ObjectId = mongodb.ObjectId;
 
 exports.getAddProductPage = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -16,7 +16,14 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
   const price = req.body.price;
-  const product = new Product(title, price, description, imageUrl);
+  const product = new Product(
+    title,
+    price,
+    description,
+    imageUrl,
+    null, // for product id
+    req.user._id //ObjectId is converted to a string for us
+  );
   product
     .save()
     .then((result) => {
@@ -68,7 +75,7 @@ exports.postEditProductPage = (req, res, next) => {
     updatedPrice,
     updatedDescription,
     updatedImageUrl,
-    new ObjectId(prodId)
+    prodId // as a string
   );
 
   product // this line officially saves everything to database

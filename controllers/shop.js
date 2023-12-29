@@ -6,7 +6,7 @@ exports.getIndexPage = (req, res, next) => {
     .then((products) => {
       res.render("shop/index", {
         prods: products,
-        pageTitle: "Lets Shop!", 
+        pageTitle: "Lets Shop!",
         path: "/",
       });
     })
@@ -48,17 +48,12 @@ exports.getProduct = (req, res, next) => {
 exports.getCartPage = (req, res, next) => {
   req.user
     .getCart()
-    .then((cart) => {
-      return cart
-        .getProducts()
-        .then((products) => {
-          res.render("shop/cart", {
-            pageTitle: "View Cart",
-            path: "/cart",
-            products: products,
-          });
-        })
-        .catch((err) => console.log(err)); // A Sequelize magic method
+    .then((products) => {
+      res.render("shop/cart", {
+        pageTitle: "View Cart",
+        path: "/cart",
+        products: products,
+      });
     })
     .catch((err) => {
       console.log(err);
@@ -67,40 +62,15 @@ exports.getCartPage = (req, res, next) => {
 
 exports.postAddCart = (req, res, next) => {
   const prodId = req.body.productId;
-  let fetchedCart;
-  // to get access to the cart
-  req.user
-    .getCart()
-    .then((cart) => {
-      fetchedCart = cart;
-      return cart.getProducts({ where: { id: prodId } }); // retrieve only single product
+
+  Product.findByPk(prodId)
+    .then((product) => {
+      return req.user.addToCart(product);
     })
-    .then((products) => {
-      let product;
-      if (products.length > 0) {
-        product = products[0];
-      }
-      let newQuantity = 1;
-      if (product) {
-        // To get old quantity and update it with new qty value
-        const oldQuantity = product.cartItem.quantity;
-        newQuantity = oldQuantity + 1;
-        fetchedCart.addProduct(product, {
-          through: { quantity: newQuantity },
-        });
-      }
-      return Product.findByPk(prodId)
-        .then((product) => {
-          return fetchedCart.addProduct(product, {
-            through: { quantity: newQuantity },
-          }); // another Sequelize magic method
-        })
-        .catch((err) => console.log(err));
-    })
-    .then(() => {
+    .then((result) => {
+      console.log(result);
       res.redirect("/cart");
-    })
-    .catch((err) => console.log(err));
+    });
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
@@ -109,15 +79,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
   // We will also need the price to properly delete from the cart and update it properly
   // First retrieve user's cart
   req.user
-    .getCart()
-    .then((cart) => {
-      // to now find the specific product id to delete
-      return cart.getProducts({ where: { id: prodId } });
-    })
-    .then((products) => {
-      const product = products[0];
-      return product.cartItem.destroy();
-    })
+    .deleteItemFromCart(prodId)
     .then((result) => {
       res.redirect("/cart");
     })
@@ -140,28 +102,29 @@ exports.getOrdersPage = (req, res, next) => {
 exports.postCreateOrder = (req, res, next) => {
   let fetchedCart;
   req.user
-    .getCart()
-    .then((cart) => {
-      fetchedCart = cart;
-      return cart.getProducts();
-    })
-    .then((products) => {
-      return req.user
-        .createOrder()
-        .then((order) => {
-          return order.addProducts(
-            products.map((product) => {
-              product.orderItem = { quantity: product.cartItem.quantity };
-              return product;
-            })
-          );
-        })
-        .catch((err) => console.log(err));
-      // console.log(products);
-    })
-    .then((result) => {
-      return fetchedCart.setProducts(null);
-    })
+    .addOrder()
+    // .getCart()
+    // .then((cart) => {
+    //   fetchedCart = cart;
+    //   return cart.getProducts();
+    // })
+    // .then((products) => {
+    //   return req.user
+    //     .createOrder()
+    //     .then((order) => {
+    //       return order.addProducts(
+    //         products.map((product) => {
+    //           product.orderItem = { quantity: product.cartItem.quantity };
+    //           return product;
+    //         })
+    //       );
+    //     })
+    //     .catch((err) => console.log(err));
+    //   // console.log(products);
+    // })
+    // .then((result) => {
+    //   return fetchedCart.setProducts(null);
+    // })
     .then((result) => {
       res.redirect("/orders");
     })

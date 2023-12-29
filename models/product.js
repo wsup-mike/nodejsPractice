@@ -1,13 +1,15 @@
 const mongodb = require("mongodb");
 const getDb = require("../utils/database").getDb; // Need the getDb method to connect to database
+const ObjectId = mongodb.ObjectId;
 
 class Product {
-  constructor(title, price, description, imageUrl, id) {
+  constructor(title, price, description, imageUrl, id, userId) {
     this.title = title;
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
-    this._id = id;
+    this._id = id ? new mongodb.ObjectId(id) : null;
+    this.userId = userId;
   }
 
   // An 'instance method' to save this new instance in our MongoDB database
@@ -20,7 +22,7 @@ class Product {
       // Product exists! Proceed with updating product!
       dbOperation = db
         .collection("products")
-        .updateOne({ _id: new mongodb.ObjectId(this._id) }, { $set: this });
+        .updateOne({ _id: this._id }, { $set: this });
     } else {
       // Product does NOT exist! Let's insert into database as new product!
       dbOperation = db.collection("products").insertOne(this);
