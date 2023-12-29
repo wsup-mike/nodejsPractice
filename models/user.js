@@ -98,17 +98,19 @@ class User {
     // to insert 1 new order that represents our current cart!
     const db = getDb();
 
-    const order = {
-      items: this.cart.items,
-      user: {
-        _id: new ObjectId(this._id),
-        name: this.name,
-      },
-    };
-
-    return db
-      .collection("orders") // to insert existing 'cart' in orders collection!
-      .insertOne(this.cart)
+    return this.getCart()
+      .then((products) => {
+        const order = {
+          items: products,
+          user: {
+            _id: new ObjectId(this._id),
+            name: this.name,
+          },
+        };
+        return db
+          .collection("orders") // to insert existing 'cart' in orders collection!
+          .insertOne(order);
+      })
       .then((result) => {
         this.cart = { items: [] }; // once completed, to empty the array back to []
         // to update the user in the database
@@ -119,7 +121,13 @@ class User {
       });
   }
 
-  getOrder() {}
+  getOrders() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .find({ "user._id": new ObjectId(this._id) })
+      .toArray();
+  }
 
   static findById(userId) {
     const db = getDb();

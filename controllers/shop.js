@@ -88,7 +88,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
 exports.getOrdersPage = (req, res, next) => {
   req.user
-    .getOrders({ include: ["products"] })
+    .getOrders()
     .then((orders) => {
       res.render("shop/orders", {
         pageTitle: "Orders Page",
