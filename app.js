@@ -2,8 +2,10 @@ const http = require("http");
 const path = require("path");
 const express = require("express");
 const app = express();
+const mongoose = require("mongoose");
+
 const errorController = require("./controllers/404");
-const mongoConnect = require("./utils/database").mongoconnect;
+// const mongoConnect = require("./utils/database").mongoconnect;
 const User = require("./models/user");
 
 const adminRoutes = require("./routes/admin");
@@ -34,7 +36,15 @@ app.use(shopRoutes);
 
 app.use(errorController.get404Page);
 
-mongoConnect(() => {
-  console.log();
-  app.listen(3000);
-});
+// mongoConnect(() => {
+//   console.log();
+//   app.listen(3000);
+// });
+mongoose
+  .connect(
+    "mongodb+srv://coolsuedeadidas:1password1@cluster0.s9dqd5j.mongodb.net/?retryWrites=true&w=majority"
+  )
+  .then((result) => {
+    app.listen(3000);
+  })
+  .catch((err) => console.log(err));
