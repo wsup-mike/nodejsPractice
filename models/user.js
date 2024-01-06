@@ -1,3 +1,99 @@
+const mongoose = require("mongoose"); // 1) import mongoose
+
+const Schema = mongoose.Schema; // 2) to create the constructor
+
+const userSchema = new Schema({
+  // 3) To define the 'user' schema
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  cart: {
+    items: [
+      {
+        productId: {
+          type: mongoose.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+  },
+});
+
+userSchema.methods.addToCart = function (product) {
+  // to add our own logic: To include the previous addToCart() function and tweak it
+  const cartProductIndex = this.cart.items.findIndex((cp) => {
+    return cp.productId.toString() === product._id.toString();
+  });
+
+  let newQuantity = 1;
+
+  const updatedCartItems = [...this.cart.items]; // to give new array with all existing items in current cart (First to det. if we have item in cart already)
+
+  // If product exists, determine the qty
+  if (cartProductIndex >= 0) {
+    newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+
+    // to be able to interact with this copy of the array
+    updatedCartItems[cartProductIndex].quantity = newQuantity;
+  } else {
+    // in case item did NOT yet exist
+    updatedCartItems.push({
+      productId: product._id,
+      quantity: newQuantity,
+    });
+  }
+
+  // To add product to the cart (By ADDING product TO the array)
+  const updatedCart = {
+    items: updatedCartItems,
+  }; // override previous (Not merge!)
+
+  // To update the user's 'cart' property (To store this cart there)
+  // const db = getDb();
+  // return db.collection("users").updateOne(
+  //   { _id: new ObjectId(this._id) }, // which part of data to update
+  //   { $set: { cart: updatedCart } } // the value to update with
+  // );
+  this.cart = updatedCart;
+  return this.save();
+};
+
+// userSchema.methods.getCart = function () {
+//   // to retrieve product ids and their quantities
+//   const db = getDb();
+//   const productIds = this.cart.items.map((i) => {
+//     return i.productId;
+//   });
+
+//   return db
+//     .collection("products")
+//     .find({ _id: { $in: productIds } })
+//     .toArray()
+//     .then((products) => {
+//       return products.map((p) => {
+//         return {
+//           ...p,
+//           quantity: this.cart.items.find((i) => {
+//             return i.productId.toString() === p._id.toString();
+//           }).quantity,
+//         };
+//       });
+//     })
+//     .catch((err) => console.log(err)); // Provides full access to existing user's cart!
+// };
+
+module.exports = mongoose.model("User", userSchema);
+
 // const mongodb = require("mongodb");
 // const getDb = require("../utils/database").getDb;
 // const ObjectId = mongodb.ObjectId;
@@ -16,67 +112,14 @@
 //     return db.collection("users").insertOne(this);
 //   }
 
-//   addToCart(product) {
-//     // 1st check: does product to be added exist already?
-//     const cartProductIndex = this.cart.items.findIndex((cp) => {
-//       return cp.productId.toString() === product._id.toString();
-//     });
+// addToCart(product) {
+//   // 1st check: does product to be added exist already?
+// };
 
-//     let newQuantity = 1;
+// this will exist on every user instance
+// getCart() {
 
-//     const updatedCartItems = [...this.cart.items]; // to give new array with all existing items in current cart (First to det. if we have item in cart already)
-
-//     // If product exists, determine the qty
-//     if (cartProductIndex >= 0) {
-//       newQuantity = this.cart.items[cartProductIndex].quantity + 1;
-
-//       // to be able to interact with this copy of the array
-//       updatedCartItems[cartProductIndex].quantity = newQuantity;
-//     } else {
-//       // in case item did NOT yet exist
-//       updatedCartItems.push({
-//         productId: new ObjectId(product._id),
-//         quantity: newQuantity,
-//       });
-//     }
-
-//     // To add product to the cart (By ADDING product TO the array)
-//     const updatedCart = {
-//       items: updatedCartItems,
-//     }; // override previous (Not merge!)
-
-//     // To update the user's 'cart' property (To store this cart there)
-//     const db = getDb();
-//     return db.collection("users").updateOne(
-//       { _id: new ObjectId(this._id) }, // which part of data to update
-//       { $set: { cart: updatedCart } } // the value to update with
-//     );
-//   }
-
-//   // this will exist on every user instance
-//   getCart() {
-//     // to retrieve product ids and their quantities
-//     const db = getDb();
-//     const productIds = this.cart.items.map((i) => {
-//       return i.productId;
-//     });
-
-//     return db
-//       .collection("products")
-//       .find({ _id: { $in: productIds } })
-//       .toArray()
-//       .then((products) => {
-//         return products.map((p) => {
-//           return {
-//             ...p,
-//             quantity: this.cart.items.find((i) => {
-//               return i.productId.toString() === p._id.toString();
-//             }).quantity,
-//           };
-//         });
-//       })
-//       .catch((err) => console.log(err)); // Provides full access to existing user's cart!
-//   }
+// }
 
 //   deleteItemFromCart(productId) {
 //     // to filter the array and save to new variable (To retrieve everything back EXCEPT that item which we are deleting)

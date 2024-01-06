@@ -21,9 +21,9 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
-  User.findById("65820a4263c8003dc22ea947")
+  User.findById("6597afbfd852b56a77527a35")
     .then((user) => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user;
       next();
     })
     .catch((err) => {
@@ -42,9 +42,21 @@ app.use(errorController.get404Page);
 // });
 mongoose
   .connect(
-    "mongodb+srv://coolsuedeadidas:1password1@cluster0.s9dqd5j.mongodb.net/?retryWrites=true&w=majority"
+    "mongodb+srv://coolsuedeadidas:1password1@cluster0.s9dqd5j.mongodb.net/shop?retryWrites=true&w=majority"
   )
   .then((result) => {
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          name: "OrangeDeuce",
+          email: "coolsuedepumas@gmail.com",
+          cart: {
+            items: [],
+          },
+        });
+        user.save();
+      }
+    });
     app.listen(3000);
   })
   .catch((err) => console.log(err));

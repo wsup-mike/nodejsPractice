@@ -16,14 +16,13 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
   const price = req.body.price;
-  const product = new Product(
-    title,
-    price,
-    description,
-    imageUrl,
-    null, // for product id
-    req.user._id //ObjectId is converted to a string for us
-  );
+  const product = new Product({
+    title: title, // the 'key' title is from model and the 'value' title is from above,
+    price: price,
+    description: description,
+    imageUrl: imageUrl,
+    userId: req.user,
+  });
   product
     .save()
     .then((result) => {
@@ -46,7 +45,7 @@ exports.getEditProductPage = (req, res, next) => {
   const prodId = req.params.productId;
 
   // Lets find the product to be edited
-  Product.findByPk(prodId)
+  Product.findById(prodId)
     .then((product) => {
       if (!product) {
         return res.redirect("/");
@@ -70,28 +69,35 @@ exports.postEditProductPage = (req, res, next) => {
   const updatedDescription = req.body.description;
   const updatedPrice = req.body.price;
 
-  const product = new Product(
-    updatedTitle,
-    updatedPrice,
-    updatedDescription,
-    updatedImageUrl,
-    prodId // as a string
-  );
+  // const product = new Product(
+  //   updatedTitle,
+  //   updatedPrice,
+  //   updatedDescription,
+  //   updatedImageUrl,
+  //   prodId // as a string
+  // );
 
-  product // this line officially saves everything to database
-    .save()
+  Product.findById(prodId) // Here you will get back a full mongoose object
+    .then((product) => {
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDescription;
+      product.imageUrl = updatedImageUrl;
+      return product.save();
+    })
     .then((result) => {
       console.log("Updated Product!");
       res.redirect("/admin/products");
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch((err) => console.log(err));
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
+    // .select("title price -_id") // for the main document
+    // .populate("userId", "name") // for the populated document
     .then((products) => {
+      console.log(products);
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
@@ -106,7 +112,7 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
 
-  Product.deleteById(prodId)
+  Product.findByIdAndDelete(prodId)
     .then(() => {
       console.log("Product Destroyed");
       res.redirect("/admin/products");

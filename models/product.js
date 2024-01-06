@@ -1,3 +1,33 @@
+const mongoose = require("mongoose"); // 1) import mongoose
+
+const Schema = mongoose.Schema; // 2) use Schema constructor to create new Schema
+
+const productSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  imageUrl: {
+    type: String,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Types.ObjectId,
+    ref: "User", // Connects any other mongoose models are related to this SPECIFI data. To refer to the 'User' model
+    required: true,
+  },
+}); // 3) Create the new 'product' schema
+
+module.exports = mongoose.model("Product", productSchema);
+
 // const mongodb = require("mongodb");
 // const getDb = require("../utils/database").getDb; // Need the getDb method to connect to database
 // const ObjectId = mongodb.ObjectId;

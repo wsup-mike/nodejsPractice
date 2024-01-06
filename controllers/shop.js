@@ -2,8 +2,9 @@ const Product = require("../models/product");
 // const Cart = require("../models/cart");
 
 exports.getIndexPage = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
+      console.log(products);
       res.render("shop/index", {
         prods: products,
         pageTitle: "Lets Shop!",
@@ -16,8 +17,9 @@ exports.getIndexPage = (req, res, next) => {
 };
 
 exports.getProductsPage = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
+      console.log(products);
       res.render("shop/product-list", {
         pageTitle: "Home Page - Lets Shop!",
         path: "/products",
@@ -34,7 +36,7 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
 
   // Then using Product model to 'find' that product
-  Product.findByPk(prodId)
+  Product.findById(prodId)
     .then((product) => {
       res.render("shop/product-detail", {
         pageTitle: product.title,
@@ -47,8 +49,10 @@ exports.getProduct = (req, res, next) => {
 
 exports.getCartPage = (req, res, next) => {
   req.user
-    .getCart()
-    .then((products) => {
+    .populate("cart.items.productId")
+    .execPopulate()
+    .then((user) => {
+      const products = user.cart.items;
       res.render("shop/cart", {
         pageTitle: "View Cart",
         path: "/cart",
@@ -63,7 +67,7 @@ exports.getCartPage = (req, res, next) => {
 exports.postAddCart = (req, res, next) => {
   const prodId = req.body.productId;
 
-  Product.findByPk(prodId)
+  Product.findById(prodId)
     .then((product) => {
       return req.user.addToCart(product);
     })
