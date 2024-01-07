@@ -20,7 +20,7 @@ const productSchema = new Schema({
     required: true,
   },
   userId: {
-    type: mongoose.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "User", // Connects any other mongoose models are related to this SPECIFI data. To refer to the 'User' model
     required: true,
   },

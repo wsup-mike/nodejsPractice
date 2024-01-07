@@ -16,7 +16,7 @@ const userSchema = new Schema({
     items: [
       {
         productId: {
-          type: mongoose.Types.ObjectId,
+          type: Schema.Types.ObjectId,
           ref: "Product",
           required: true,
         },
@@ -68,29 +68,19 @@ userSchema.methods.addToCart = function (product) {
   return this.save();
 };
 
-// userSchema.methods.getCart = function () {
-//   // to retrieve product ids and their quantities
-//   const db = getDb();
-//   const productIds = this.cart.items.map((i) => {
-//     return i.productId;
-//   });
+userSchema.methods.removeFromCart = function (productId) {
+  const updatedCartItems = this.cart.items.filter((item) => {
+    return item.productId.toString() !== productId.toString();
+  });
 
-//   return db
-//     .collection("products")
-//     .find({ _id: { $in: productIds } })
-//     .toArray()
-//     .then((products) => {
-//       return products.map((p) => {
-//         return {
-//           ...p,
-//           quantity: this.cart.items.find((i) => {
-//             return i.productId.toString() === p._id.toString();
-//           }).quantity,
-//         };
-//       });
-//     })
-//     .catch((err) => console.log(err)); // Provides full access to existing user's cart!
-// };
+  this.cart.items = updatedCartItems; //  override existing value
+  return this.save();
+};
+
+userSchema.methods.clearCart = function () {
+  this.cart = { items: [] };
+  return this.save();
+};
 
 module.exports = mongoose.model("User", userSchema);
 
@@ -116,10 +106,30 @@ module.exports = mongoose.model("User", userSchema);
 //   // 1st check: does product to be added exist already?
 // };
 
-// this will exist on every user instance
-// getCart() {
+//   // this will exist on every user instance
+//   getCart() {
+//     // to retrieve product ids and their quantities
+//     const db = getDb();
+//     const productIds = this.cart.items.map((i) => {
+//       return i.productId;
+//     });
 
-// }
+//     return db
+//       .collection("products")
+//       .find({ _id: { $in: productIds } })
+//       .toArray()
+//       .then((products) => {
+//         return products.map((p) => {
+//           return {
+//             ...p,
+//             quantity: this.cart.items.find((i) => {
+//               return i.productId.toString() === p._id.toString();
+//             }).quantity,
+//           };
+//         });
+//       })
+//       .catch((err) => console.log(err)); // Provides full access to existing user's cart!
+//   }
 
 //   deleteItemFromCart(productId) {
 //     // to filter the array and save to new variable (To retrieve everything back EXCEPT that item which we are deleting)
