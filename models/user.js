@@ -184,7 +184,6 @@ module.exports = mongoose.model("User", userSchema);
 
 //   static findById(userId) {
 //     const db = getDb();
-
 //     return db
 //       .collection("users")
 //       .findOne({ _id: new ObjectId(userId) }) // converts userId to an ObjectId
