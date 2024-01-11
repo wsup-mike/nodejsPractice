@@ -3,6 +3,7 @@ const path = require("path");
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const session = require("express-session");
 
 const errorController = require("./controllers/404");
 // const mongoConnect = require("./utils/database").mongoconnect;
@@ -20,6 +21,13 @@ const { error } = require("console");
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+  session({
+    secret: "superman",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 app.use((req, res, next) => {
   User.findById("6598cd9676cd0a620f50db18")
