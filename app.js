@@ -42,16 +42,16 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  User.findById("6598cd9676cd0a620f50db18")
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
+// app.use((req, res, next) => {
+//   User.findById("6598cd9676cd0a620f50db18")
+//     .then((user) => {
+//       req.user = user;
+//       next();
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     });
+// });
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
