@@ -42,7 +42,20 @@ app.use(
   })
 );
 
-app.use();
+app.use((req, res, next) => {
+  if (!req.session.user) {
+    return next();
+  }
+
+  User.findById(req.session.user._id) // Copied from former middleware in app.js
+    .then((user) => {
+      req.user = user;
+      next(); // so the incoming request wiil continue w/ next middleware in line
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
 
 // app.use((req, res, next) => {
 //   User.findById("6598cd9676cd0a620f50db18")
