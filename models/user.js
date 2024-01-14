@@ -4,11 +4,15 @@ const Schema = mongoose.Schema; // 2) to create the constructor
 
 const userSchema = new Schema({
   // 3) To define the 'user' schema
-  name: {
+  // name: {
+  //   type: String,
+  //   required: true,
+  // },
+  email: {
     type: String,
     required: true,
   },
-  email: {
+  password: {
     type: String,
     required: true,
   },
