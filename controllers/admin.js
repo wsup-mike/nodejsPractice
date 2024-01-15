@@ -4,6 +4,10 @@ const Product = require("../models/product");
 // const ObjectId = mongodb.ObjectId;
 
 exports.getAddProductPage = (req, res, next) => {
+  // if (!req.session.isLoggedIn) {
+  //   console.log("Unauthorized user tried to access restricted route");
+  //   return res.redirect("/login");
+  // }
   res.render("admin/edit-product", {
     pageTitle: "Add Product Page",
     path: "/admin/add-product",
