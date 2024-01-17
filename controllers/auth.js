@@ -1,5 +1,13 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
+
+const transporter = nodemailer.createTransport(sendgridTransport({
+  auth: {
+    api_key: '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',
+  }
+}));
 
 exports.getLoginPage = (req, res, next) => {
   // const isLoggedIn = req.get("Cookie").trim().split("=")[1];
@@ -95,7 +103,16 @@ exports.postSignup = (req, res, next) => {
         })
         .then((result) => {
           res.redirect("/login");
-        });
+          return transporter.sendMail({
+            to: email,
+            from: 'coolsuedepumas@gmail.com',
+            subject: 'You have sucessfully registered with Luminescence!',
+            html: '<h1>Good decision joining the Luminescence Family!</h1>'
+          });
+        })
+        .catch(err => {
+          console.log(err)
+        })
     })
     .catch((err) => console.log(err));
 };
