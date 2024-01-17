@@ -10,7 +10,7 @@ exports.getProductsPage = (req, res, next) => {
         pageTitle: "Home Page - Lets Shop!",
         path: "/products",
         prods: products,
-        isAuthenticated: req.session.isLoggedIn,
+        // isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -29,7 +29,7 @@ exports.getProduct = (req, res, next) => {
         pageTitle: product.title,
         path: "/products",
         product: product,
-        isAuthenticated: req.session.isLoggedIn,
+        // isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -43,7 +43,7 @@ exports.getIndexPage = (req, res, next) => {
         prods: products,
         pageTitle: "Lets Shop!",
         path: "/",
-        isAuthenticated: req.session.isLoggedIn,
+        // isAuthenticated: req.session.isLoggedIn,
         csrfToken: req.csrfToken(),
       });
     })
@@ -61,7 +61,7 @@ exports.getCartPage = (req, res, next) => {
         pageTitle: "View Cart",
         path: "/cart",
         products: products,
-        isAuthenticated: req.session.isLoggedIn,
+        // isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -102,7 +102,7 @@ exports.getOrdersPage = (req, res, next) => {
         pageTitle: "Orders Page",
         path: "/orders",
         orders: orders,
-        isAuthenticated: req.session.isLoggedIn,
+        // isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -118,7 +118,8 @@ exports.postCreateOrder = (req, res, next) => {
       });
       const order = new Order({
         user: {
-          name: req.user.name,
+          // name: req.user.name, // when signing up, users only need email
+          email: req.user.email,
           userId: req.user,
         },
         products: products,
@@ -138,6 +139,6 @@ exports.getCheckoutPage = (req, res, next) => {
   res.render("shop/checkout", {
     pageTitle: "Checkout",
     path: "/cart",
-    isAuthenticated: req.session.isLoggedIn,
+    // isAuthenticated: req.session.isLoggedIn,
   });
 };

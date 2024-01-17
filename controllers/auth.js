@@ -8,7 +8,7 @@ exports.getLoginPage = (req, res, next) => {
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    isAuthenticated: false,
+    // isAuthenticated: false,
   });
 };
 
@@ -16,7 +16,7 @@ exports.getSignupPage = (req, res, next) => {
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
-    isAuthenticated: false,
+    // isAuthenticated: false,
   });
 };
 
