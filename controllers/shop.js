@@ -44,6 +44,7 @@ exports.getIndexPage = (req, res, next) => {
         pageTitle: "Lets Shop!",
         path: "/",
         isAuthenticated: req.session.isLoggedIn,
+        csrfToken: req.csrfToken(),
       });
     })
     .catch((err) => {

@@ -5,6 +5,7 @@ const app = express();
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
+const csurf = require("csurf");
 
 const errorController = require("./controllers/404");
 // const mongoConnect = require("./utils/database").mongoconnect;
@@ -19,6 +20,8 @@ const store = new MongoDBStore({
   uri: MONGODB_URI, // a connection string to specify which database server to store our session data
   collection: "sessions", // To define the collection where our new sessions will be stored
 });
+
+const csurfProtection = csurf();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -42,6 +45,8 @@ app.use(
   })
 );
 
+app.use(csurfProtection);
+
 app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
@@ -55,6 +60,12 @@ app.use((req, res, next) => {
     .catch((err) => {
       console.log(err);
     });
+});
+
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
 });
 
 // app.use((req, res, next) => {
