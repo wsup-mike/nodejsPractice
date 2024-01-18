@@ -1,20 +1,24 @@
 const User = require("../models/user");
+const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
-const nodemailer = require('nodemailer');
-const sendgridTransport = require('nodemailer-sendgrid-transport');
+const nodemailer = require("nodemailer");
+const sendgridTransport = require("nodemailer-sendgrid-transport");
 
-const transporter = nodemailer.createTransport(sendgridTransport({
-  auth: {
-    api_key: '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',
-  }
-}));
+const transporter = nodemailer.createTransport(
+  sendgridTransport({
+    auth: {
+      api_key:
+        "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",
+    },
+  })
+);
 
 exports.getLoginPage = (req, res, next) => {
   // const isLoggedIn = req.get("Cookie").trim().split("=")[1];
   // console.log(isLoggedIn);
   // console.log(req.session.isLoggedIn);
   // console.log(req.flash('error'));
-  let message = req.flash('error');
+  let message = req.flash("error");
   if (message) {
     message = message[0];
   } else {
@@ -29,7 +33,7 @@ exports.getLoginPage = (req, res, next) => {
 };
 
 exports.getSignupPage = (req, res, next) => {
-  let message = req.flash('error');
+  let message = req.flash("error");
   if (message) {
     message = message[0];
   } else {
@@ -50,7 +54,7 @@ exports.postLogin = (req, res, next) => {
     .then((user) => {
       if (!user) {
         // means login failed
-        req.flash('error', 'Invalid email or password');
+        req.flash("error", "Invalid email or password");
         return res.redirect("/login");
       }
       bcrypt
@@ -64,7 +68,7 @@ exports.postLogin = (req, res, next) => {
               res.redirect("/");
             });
           }
-          req.flash('error', 'Invalid email or password');
+          req.flash("error", "Invalid email or password");
           res.redirect("/login");
         })
         .catch((err) => {
@@ -86,7 +90,7 @@ exports.postSignup = (req, res, next) => {
       // if the user actually exists!
       if (userDoc) {
         // then no need to create new user
-        req.flash('error', 'E-mail already exists!')
+        req.flash("error", "E-mail already exists!");
         return res.redirect("/signup");
       }
       return bcrypt
@@ -105,14 +109,14 @@ exports.postSignup = (req, res, next) => {
           res.redirect("/login");
           return transporter.sendMail({
             to: email,
-            from: 'coolsuedepumas@gmail.com',
-            subject: 'You have sucessfully registered with Luminescence!',
-            html: '<h1>Good decision joining the Luminescence Family!</h1>'
+            from: "coolsuedepumas@gmail.com",
+            subject: "You have sucessfully registered with Luminescence!",
+            html: "<h1>Good decision joining the Luminescence Family!</h1>",
           });
         })
-        .catch(err => {
-          console.log(err)
-        })
+        .catch((err) => {
+          console.log(err);
+        });
     })
     .catch((err) => console.log(err));
 };
@@ -121,5 +125,54 @@ exports.postLogout = (req, res, next) => {
   req.session.destroy((err) => {
     console.log(err);
     res.redirect("/");
+  });
+};
+
+exports.getResetPage = (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render("auth/reset", {
+    path: "/reset",
+    pageTitle: "Reset Password",
+    errorMessage: message,
+  });
+};
+
+exports.postReset = (req, res, next) => {
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log(err);
+      return res.redirect("/reset");
+    }
+    const token = buffer.toString("hex");
+    User.findOne({ email: req.body.email })
+      .then((user) => {
+        if (!user) {
+          req.flash("error", "No account with that email exists!");
+          return res.redirect("/reset");
+        }
+        user.resetToken = token;
+        user.resetTokenExpiration = Date.now() + 3600000; // 1 hr = 3600000 ms.
+        return user.save(); // to finally update user in the database
+      })
+      .then((result) => {
+        // now to send the token reset email to user
+        res.redirect("/");
+        transporter.sendMail({
+          to: req.body.email,
+          from: "coolsuedepumas@gmail.com",
+          subject: "Reset Your Password",
+          html: `
+            <h1>Reset your password below</h1>
+            <p>You requested a password reset</p>
+            <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
+          `,
+        });
+      })
+      .catch((err) => console.log(err));
   });
 };
