@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
       api_key:
-        "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",
+        "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",
     },
   })
 );
@@ -19,7 +19,7 @@ exports.getLoginPage = (req, res, next) => {
   // console.log(req.session.isLoggedIn);
   // console.log(req.flash('error'));
   let message = req.flash("error");
-  if (message) {
+  if (message.length > 0) {
     message = message[0];
   } else {
     message = null;
@@ -34,7 +34,7 @@ exports.getLoginPage = (req, res, next) => {
 
 exports.getSignupPage = (req, res, next) => {
   let message = req.flash("error");
-  if (message) {
+  if (message.length > 0) {
     message = message[0];
   } else {
     message = null;
@@ -175,4 +175,30 @@ exports.postReset = (req, res, next) => {
       })
       .catch((err) => console.log(err));
   });
+};
+
+exports.getNewPasswordPage = (req, res, next) => {
+  // 1) extract the token from request URL
+  const token = req.params.token;
+  // 2) Find the 'user' that matches this token AND expiration not exceeded
+  User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
+    .then((user) => {
+      // Flash messaging implementation
+      let message = req.flash("error");
+      if (message.length > 0) {
+        message = message[0];
+      } else {
+        message = null;
+      }
+      // Render the page
+      res.render("auth/new-password", {
+        path: "/new-password",
+        pageTitle: "New Password",
+        errorMessage: message,
+        userId: user._id.toString(),
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
