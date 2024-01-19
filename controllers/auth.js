@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
       api_key:
-        "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",
+        "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",
     },
   })
 );
@@ -196,9 +196,40 @@ exports.getNewPasswordPage = (req, res, next) => {
         pageTitle: "New Password",
         errorMessage: message,
         userId: user._id.toString(),
+        passwordToken: token,
       });
     })
     .catch((err) => {
       console.log(err);
     });
+};
+
+exports.postNewPassword = (req, res, next) => {
+  const newPassword = req.body.password; // capture pw input from form
+  const userId = req.body.userId; // capture the user to compare
+  const passwordToken = req.body.passwordToken; // capture the token to compare
+  let resetUser; // to declare a holding place for the user to be used later function scope
+
+  // 1) find if user exists using token + expiration date not exceeded + user id
+  User.findOne({
+    resetToken: passwordToken,
+    resetTokenExpiration: { $gt: Date.now() },
+    _id: userId,
+  })
+    .then((user) => {
+      // once we find user...to first hash pw,
+      resetUser = user;
+      return bcrypt.hash(newPassword, 12);
+    })
+    .then((hashedPassword) => {
+      resetUser.password = hashedPassword;
+      resetUser.resetToken = null;
+      resetUser.resetTokenExpiration = undefined;
+      return resetUser.save();
+    })
+    .then((result) => {
+      // to use the result of the save()
+      res.redirect("/login");
+    })
+    .catch((err) => console.log(err));
 };
