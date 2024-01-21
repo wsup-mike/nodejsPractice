@@ -75,31 +75,26 @@ exports.postEditProductPage = (req, res, next) => {
   const updatedDescription = req.body.description;
   const updatedPrice = req.body.price;
 
-  // const product = new Product(
-  //   updatedTitle,
-  //   updatedPrice,
-  //   updatedDescription,
-  //   updatedImageUrl,
-  //   prodId // as a string
-  // );
-
   Product.findById(prodId) // Here you will get back a full mongoose object
     .then((product) => {
+      if (product.userId.toString() !== req.user._id.toString()) {
+        // what to do in case user is not authorized to perform this action!
+        return res.redirect("/");
+      }
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDescription;
       product.imageUrl = updatedImageUrl;
-      return product.save();
-    })
-    .then((result) => {
-      console.log("Updated Product!");
-      res.redirect("/admin/products");
+      return product.save().then((result) => {
+        console.log("Updated Product!");
+        res.redirect("/admin/products");
+      });
     })
     .catch((err) => console.log(err));
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product.find({ userId: req.user._id }) // To filter products found by 'logged-in user' ones only
     // .select("title price -_id") // for the main document
     // .populate("userId", "name") // for the populated document
     .then((products) => {
@@ -108,7 +103,6 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
-        // isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -119,7 +113,7 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
 
-  Product.findByIdAndDelete(prodId)
+  Product.deleteOne({ _id: prodId, userId: req.user._id })
     .then(() => {
       console.log("Product Destroyed");
       res.redirect("/admin/products");
