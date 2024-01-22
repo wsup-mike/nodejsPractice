@@ -25,7 +25,7 @@ router.post(
             "Warning: I see you bro! You are on the unauthorized list! This email is a malicious bad actor!"
           );
         }
-        // return true;
+        return true;
       }),
 
     body(
