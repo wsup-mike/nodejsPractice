@@ -3,12 +3,13 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
+const { validationResult } = require("express-validator");
 
 const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
       api_key:
-        "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",
+        "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",
     },
   })
 );
@@ -85,6 +86,17 @@ exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
+  const errors = validationResult(req);
+
+  if (errors.array()) {
+    console.log(errors.array());
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      pageTitle: "Signup",
+      // errorMessage: errors.array()[0].msg,
+      errorMessage: errors.array(),
+    });
+  }
   User.findOne({ email: email })
     .then((userDoc) => {
       // if the user actually exists!

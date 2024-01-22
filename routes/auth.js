@@ -1,4 +1,5 @@
 const express = require("express");
+const { check, body } = require("express-validator");
 
 const authController = require("../controllers/auth");
 
@@ -10,7 +11,32 @@ router.get("/signup", authController.getSignupPage);
 
 router.post("/login", authController.postLogin);
 
-router.post("/signup", authController.postSignup);
+router.post(
+  "/signup",
+  [
+    check("email")
+      .isEmail()
+      .withMessage(
+        "Please enter a valid email you frikin idiot. (im not gonna ask again)"
+      )
+      .custom((value, { req }) => {
+        if (value === "hacker@gmail.com") {
+          throw new Error(
+            "Warning: I see you bro! You are on the unauthorized list! This email is a malicious bad actor!"
+          );
+        }
+        // return true;
+      }),
+
+    body(
+      "password",
+      "Please enter a password with only numbers and text and at least 5 characters."
+    )
+      .isLength({ min: 5 })
+      .isAlphanumeric(),
+  ],
+  authController.postSignup
+);
 
 router.post("/logout", authController.postLogout);
 
