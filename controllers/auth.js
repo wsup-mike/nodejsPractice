@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
       api_key:
-        "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",
+        "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",
     },
   })
 );
@@ -45,17 +45,33 @@ exports.getSignupPage = (req, res, next) => {
     pageTitle: "Signup",
     // isAuthenticated: false,
     errorMessage: message,
+    oldInput: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationErrors: [],
   });
 };
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    console.log(errors.array());
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      pageTitle: "Login",
+      errorMessage: errors.array()[0].msg,
+    });
+  }
+
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        // means login failed
-        req.flash("error", "Invalid email or password");
+        req.flash("error", "Invalid email or password.");
         return res.redirect("/login");
       }
       bcrypt
@@ -69,8 +85,6 @@ exports.postLogin = (req, res, next) => {
               res.redirect("/");
             });
           }
-          req.flash("error", "Invalid email or password");
-          res.redirect("/login");
         })
         .catch((err) => {
           console.log(err);
@@ -85,7 +99,6 @@ exports.postLogin = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -95,42 +108,39 @@ exports.postSignup = (req, res, next) => {
       path: "/signup",
       pageTitle: "Signup",
       errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password,
+        confirmPassword: req.body.confirmPassword,
+      },
+      validationErrors: errors.array(),
     });
   }
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      // if the user actually exists!
-      if (userDoc) {
-        // then no need to create new user
-        req.flash("error", "E-mail already exists!");
-        return res.redirect("/signup");
-      }
-      return bcrypt
-        .hash(password, 12)
-        .then((hashedPassword) => {
-          // to hash our password for security in the database
-          // otherwise to create a new user since no existing one found
-          const user = new User({
-            email: email,
-            password: hashedPassword,
-            cart: { items: [] },
-          });
-          return user.save();
-        })
-        .then((result) => {
-          res.redirect("/login");
-          return transporter.sendMail({
-            to: email,
-            from: "coolsuedepumas@gmail.com",
-            subject: "You have sucessfully registered with Luminescence!",
-            html: "<h1>Good decision joining the Luminescence Family!</h1>",
-          });
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+
+  bcrypt
+    .hash(password, 12)
+    .then((hashedPassword) => {
+      // to hash our password for security in the database
+      // otherwise to create a new user since no existing one found
+      const user = new User({
+        email: email,
+        password: hashedPassword,
+        cart: { items: [] },
+      });
+      return user.save();
     })
-    .catch((err) => console.log(err));
+    .then((result) => {
+      res.redirect("/login");
+      return transporter.sendMail({
+        to: email,
+        from: "coolsuedepumas@gmail.com",
+        subject: "You have sucessfully registered with Luminescence!",
+        html: "<h1>Good decision joining the Luminescence Family!</h1>",
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 exports.postLogout = (req, res, next) => {

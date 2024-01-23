@@ -2,6 +2,7 @@ const express = require("express");
 const { check, body } = require("express-validator");
 
 const authController = require("../controllers/auth");
+const User = require("../models/user");
 
 const router = express.Router();
 
@@ -9,7 +10,22 @@ router.get("/login", authController.getLoginPage);
 
 router.get("/signup", authController.getSignupPage);
 
-router.post("/login", authController.postLogin);
+router.post(
+  "/login",
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Please enter a VALID email address, dumbo!"),
+
+    body(
+      "password",
+      "Your Password not good enough: Min 6 characters and ONLY alphanumeric characters only dude!"
+    )
+      .isLength({ min: 5 })
+      .isAlphanumeric(),
+  ],
+  authController.postLogin
+);
 
 router.post(
   "/signup",
@@ -20,12 +36,21 @@ router.post(
         "Please enter a valid email you frikin idiot. (im not gonna ask again)"
       )
       .custom((value, { req }) => {
-        if (value === "hacker@gmail.com") {
-          throw new Error(
-            "Warning: I see you bro! You are on the unauthorized list! This email is a malicious bad actor!"
-          );
-        }
-        return true;
+        // if (value === "hacker@gmail.com") {
+        //   throw new Error(
+        //     "Warning: I see you bro! You are on the unauthorized list! This email is a malicious bad actor!"
+        //   );
+        // }
+        // return true;
+        return User.findOne({ email: value }).then((userDoc) => {
+          // if the user actually exists!
+          if (userDoc) {
+            // // then no need to create new user
+            // req.flash("error", "E-mail already exists!");
+            // return res.redirect("/signup");
+            return Promise.reject("E-mail already exists!");
+          }
+        });
       }),
 
     body(
@@ -34,7 +59,15 @@ router.post(
     )
       .isLength({ min: 5 })
       .isAlphanumeric(),
+
+    body("confirmPassword", "").custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords do NOT match!");
+      }
+      return true;
+    }),
   ],
+
   authController.postSignup
 );
 
