@@ -15,14 +15,16 @@ router.post(
   [
     body("email")
       .isEmail()
-      .withMessage("Please enter a VALID email address, dumbo!"),
+      .withMessage("Please enter a VALID email address, dumbo!")
+      .normalizeEmail(),
 
     body(
       "password",
       "Your Password not good enough: Min 6 characters and ONLY alphanumeric characters only dude!"
     )
       .isLength({ min: 5 })
-      .isAlphanumeric(),
+      .isAlphanumeric()
+      .trim(), // to remove excess whitespace!
   ],
   authController.postLogin
 );
@@ -51,21 +53,25 @@ router.post(
             return Promise.reject("E-mail already exists!");
           }
         });
-      }),
+      })
+      .normalizeEmail(),
 
     body(
       "password",
       "Please enter a password with only numbers and text and at least 5 characters."
     )
       .isLength({ min: 5 })
-      .isAlphanumeric(),
+      .isAlphanumeric()
+      .trim(),
 
-    body("confirmPassword", "").custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Passwords do NOT match!");
-      }
-      return true;
-    }),
+    body("confirmPassword", "")
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error("Passwords do NOT match!");
+        }
+        return true;
+      })
+      .trim(),
   ],
 
   authController.postSignup
