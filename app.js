@@ -56,11 +56,15 @@ app.use((req, res, next) => {
 
   User.findById(req.session.user._id) // Copied from former middleware in app.js
     .then((user) => {
+      if (!user) {
+        return next();
+      }
       req.user = user;
       next(); // so the incoming request wiil continue w/ next middleware in line
     })
     .catch((err) => {
-      console.log(err);
+      // console.log(err);
+      throw new Error(err);
     });
 });
 
