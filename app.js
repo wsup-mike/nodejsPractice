@@ -50,12 +50,20 @@ app.use(csurfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+app.use((req, res, next) => {
+  // throw new Error("Sync Dummy error");
   if (!req.session.user) {
     return next();
   }
 
   User.findById(req.session.user._id) // Copied from former middleware in app.js
     .then((user) => {
+      // throw new Error("Async Dummy error!");
       if (!user) {
         return next();
       }
@@ -64,14 +72,8 @@ app.use((req, res, next) => {
     })
     .catch((err) => {
       // console.log(err);
-      throw new Error(err);
+      next(new Error(err)); // For Async code errors to be properly captured
     });
-});
-
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
-  next();
 });
 
 // app.use((req, res, next) => {
@@ -89,7 +91,16 @@ app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.use("/500", errorController.get500Page);
 app.use(errorController.get404Page);
+app.use((error, req, res, next) => {
+  // res.redirect("/500");
+  res.status(500).render("500", {
+    pageTitle: "Error!",
+    path: "/500",
+    isAuthenticated: req.session.isLoggedIn,
+  });
+});
 
 // mongoConnect(() => {
 //   console.log();

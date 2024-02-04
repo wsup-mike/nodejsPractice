@@ -48,7 +48,7 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   const product = new Product({
-    _id: new mongoose.Types.ObjectId("65ac1639cc8445c73d27e816"),
+    // _id: new mongoose.Types.ObjectId("65ac1639cc8445c73d27e816"),
     title: title,
     price: price,
     description: description,
@@ -62,22 +62,9 @@ exports.postAddProduct = (req, res, next) => {
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      // console.log("Hey! An ERROR occurred:");
-      // console.log(err);
-      return res.status(500).render("admin/edit-product", {
-        pageTitle: "Add New Product",
-        path: "/admin/add-product",
-        editing: false,
-        hasError: true,
-        product: {
-          title: title,
-          imageUrl: imageUrl,
-          price: price,
-          description: description,
-        },
-        errorMessage: "Database operation failed. Please try again.",
-        validationErrors: [],
-      });
+      const error = new Error(err); //
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -94,6 +81,7 @@ exports.getEditProductPage = (req, res, next) => {
   // Lets find the product to be edited
   Product.findById(prodId)
     .then((product) => {
+      // throw new Error("Dummy!");
       if (!product) {
         return res.redirect("/");
       }
@@ -108,7 +96,9 @@ exports.getEditProductPage = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err); //
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -156,7 +146,11 @@ exports.postEditProductPage = (req, res, next) => {
         res.redirect("/admin/products");
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err); //
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getProducts = (req, res, next) => {
@@ -172,7 +166,9 @@ exports.getProducts = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err); //
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -185,6 +181,8 @@ exports.postDeleteProduct = (req, res, next) => {
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err); //
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
