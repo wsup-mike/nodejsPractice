@@ -9,7 +9,7 @@
             <div class="user-message user-message--error"><%= errorMessage %></div>    
         <% } %>
         <h1><% if (editing) { %>EDIT a new product<% } else { %>Add a NEW product<% } %></h1>
-        <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST">
+        <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST" enctype="multipart/form-data">
             
             <div class="form-control">
                 <label for="title">Product Title</label>
@@ -22,7 +22,7 @@
                 >
             </div>
 
-            <div class="form-control">
+            <!-- <div class="form-control">
                 <label for="imageUrl">Image URL</label>
                 <input 
                     class="<%= validationErrors.find(e => e.path === 'imageUrl') ? 'invalid' : '' %>"
@@ -30,6 +30,16 @@
                     name="imageUrl" 
                     id="imageUrl" 
                     value="https://cdn.pixabay.com/photo/2016/03/31/20/51/book-1296045_960_720.png"
+                >
+            </div> -->
+
+            <div class="form-control">
+                <label for="image">Image</label>
+                <input 
+                
+                    type="file" 
+                    name="image" 
+                    id="image"    
                 >
             </div>
             
