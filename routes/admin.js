@@ -38,7 +38,7 @@ router.post(
     // body("title").isAlphanumeric().isLength({ min: 3 }),
     body("title").isString().isLength({ min: 3 }).trim(),
 
-    body("imageUrl").isURL(),
+    // body("imageUrl").isURL(),
 
     body("price").isFloat(),
 
