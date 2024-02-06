@@ -7,6 +7,7 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csurf = require("csurf");
 const flash = require("connect-flash");
+const multer = require("multer");
 
 const errorController = require("./controllers/404");
 // const mongoConnect = require("./utils/database").mongoconnect;
@@ -32,6 +33,11 @@ const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 
 const bodyParser = require("body-parser");
+app.use(
+  multer({
+    dest: "images",
+  }).single("image")
+);
 const { error } = require("console");
 
 app.use(express.static(path.join(__dirname, "public")));
