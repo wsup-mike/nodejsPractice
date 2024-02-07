@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const fileHelper = require("../utils/file");
 
 // const mongodb = require("mongodb");
 const Product = require("../models/product");
@@ -158,6 +159,7 @@ exports.postEditProductPage = (req, res, next) => {
       product.price = updatedPrice;
       product.description = updatedDescription;
       if (image) {
+        fileHelper.deleteFile(product.imageUrl);
         product.imageUrl = image.path;
       }
       return product.save().then((result) => {
@@ -194,7 +196,14 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
 
-  Product.deleteOne({ _id: prodId, userId: req.user._id })
+  Product.findById(prodId)
+    .then((product) => {
+      if (!product) {
+        return next(new Error("Product not found."));
+      }
+      fileHelper.deleteFile(product.imageUrl);
+      return Product.deleteOne({ _id: prodId, userId: req.user._id });
+    })
     .then(() => {
       console.log("Product Destroyed");
       res.redirect("/admin/products");
