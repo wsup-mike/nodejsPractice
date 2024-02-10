@@ -186,16 +186,26 @@ exports.getCheckoutPage = (req, res, next) => {
         // to configure session
         payment_method_types: ["card"], // 2 accept CC payments
         line_items: products.map((p) => {
-          // line_items: products.map((p) => {
-          // strip format to process a pmt
+          // return {
+          //   name: p.productId.title,
+          //   description: p.productId.description,
+          //   price: p.productId.price * 100, // $ in cents
+          //   currency: "usd",
+          //   quantity: p.quantity,
+          // };
           return {
-            name: p.productId.title,
-            description: p.productId.description,
-            price: p.productId.price * 100, // $ in cents
-            currency: "usd",
+            price_data: {
+              currency: "usd",
+              unit_amount: p.productId.price * 100, // in cents
+              product_data: {
+                name: p.productId.title,
+                description: p.productId.description,
+              },
+            },
             quantity: p.quantity,
           };
         }),
+        mode: "payment",
         success_url:
           req.protocol + "://" + req.get("host") + "/checkout/success",
         cancel_url: req.protocol + "://" + req.get("host") + "/checkout/cancel",
